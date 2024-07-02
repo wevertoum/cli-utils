@@ -1,0 +1,10 @@
+#!/bin/bash
+MESSAGE=""
+
+if [ -z $1 ]; then
+  echo "[!] Parâmetro inválido"
+else
+  MESSAGE=$@
+  echo "[+] Commitando: $MESSAGE ..."
+  git add . && git commit -m "$MESSAGE" && git push
+fi

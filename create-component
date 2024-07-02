@@ -1,0 +1,53 @@
+#!/bin/bash
+function createComponent() {
+  COMPONENT_NAME="$1"
+  FILE_TYPE="$2"
+
+  if [ -z "$COMPONENT_NAME" ]; then
+    echo "Component name missing. Please provide a name."
+    exit 1
+  fi
+
+  if [ ! -d "src/components" ]; then
+    echo "The directory src/components does not exist. Please create it first."
+    exit 1
+  fi
+
+  mkdir "src/components/$COMPONENT_NAME"
+  touch "src/components/$COMPONENT_NAME/$COMPONENT_NAME.tsx"
+  touch "src/components/$COMPONENT_NAME/$COMPONENT_NAME.$FILE_TYPE"
+  touch "src/components/$COMPONENT_NAME/index.tsx"
+
+  if [ "$FILE_TYPE" == "less" ]; then
+    echo "import React from 'react';
+require('./$COMPONENT_NAME.less');
+
+interface Props {}
+const $COMPONENT_NAME: React.FC<Props> = () => {
+  return <>$COMPONENT_NAME is ready</>;
+};
+
+export default $COMPONENT_NAME;" >"src/components/$COMPONENT_NAME/$COMPONENT_NAME.tsx"
+
+    echo "export { default } from './$COMPONENT_NAME';" >"src/components/$COMPONENT_NAME/index.tsx"
+  elif [ "$FILE_TYPE" == "scss" ]; then
+echo "import React from 'react';
+import './$COMPONENT_NAME.scss';
+
+interface Props {}
+const $COMPONENT_NAME: React.FC<Props> = () => {
+  return <>$COMPONENT_NAME is ready</>;
+};
+
+export default $COMPONENT_NAME;" >"src/components/$COMPONENT_NAME/$COMPONENT_NAME.tsx"
+
+    echo "export { default } from './$COMPONENT_NAME';" >"src/components/$COMPONENT_NAME/index.tsx"
+  else
+    echo "Invalid file type. Please use 'less' or 'scss'."
+    exit 1
+  fi
+
+  echo "Component $COMPONENT_NAME created!"
+}
+
+createComponent "$1" "$2"

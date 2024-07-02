@@ -1,0 +1,44 @@
+#!/bin/bash
+
+function format_bytes {
+  size=$1
+  size_in_bytes=$((size * 1024))
+  if [[ $(uname) == "Darwin" ]]; then
+    size_formatted=$(gnumfmt --to=iec-i --suffix=B --format="%.2f" "$size_in_bytes")
+  else
+    size_formatted=$(numfmt --to=iec-i --suffix=B --format="%.2f" -d "." "$size_in_bytes")
+  fi
+  echo "$size_formatted"
+}
+
+if [ -z "$1" ]; then
+  echo "Please specify the target folder as the first argument."
+  exit 1
+fi
+
+output_file="pathfinder_repport.txt"
+dir_name="$1"
+
+if [ -f "$output_file" ]; then
+  rm "$output_file"
+fi
+
+echo "Starting scan in $(pwd) for $dir_name folders ..."
+
+while IFS= read -r path; do
+  echo "Found: $path"
+  size=$(du -s "$path" | cut -f1)
+  total_size=$((total_size + size))
+  size_formatted=$(format_bytes "$size")
+
+  output_string=$"Path $path\nSize: $size_formatted\n---------------------------------------"
+  echo -e "$output_string" >>"$output_file"
+
+done < <(find "$(pwd)" -name "$dir_name" -type d -prune)
+
+echo "Saving paths of found folders in $output_file ..."
+total_size_formatted=$(format_bytes "$total_size")
+echo "TOTAL SIZE OF $dir_name: $total_size_formatted" >>"$output_file"
+echo "✅ Search for $dir_name is done"
+echo "The total size of all $dir_name folders is $total_size_formatted and the paths are saved in $output_file"
+code "$output_file"
